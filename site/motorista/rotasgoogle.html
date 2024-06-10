@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotas no Google Maps</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0; /* Cor de fundo */
+            color: #333; /* Cor do texto */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://t3.ftcdn.net/jpg/08/17/33/94/240_F_817339445_MJ25a9RjiATxesUQw0l7Cws7QMsBOSu8.webp');
+            background-size: cover;
+            /*filter: blur(5px);  Efeito de desfoque apenas na imagem de fundo */
+            z-index: -1; /* Coloca o fundo atrás do conteúdo */
+        }
+
+        h1 {
+            color: #0b2470; /* Cor do título */
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #rotas {
+            background-color: #fff; /* Cor de fundo do container das rotas */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #0b2470; /* Cor do título das rotas */
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0b2470; /* Cor do rótulo */
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #0b2470; /* Cor de fundo do botão */
+            color: #fff; /* Cor do texto do botão */
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s; /* Transição suave de cor ao passar o mouse */
+        }
+
+        button:hover {
+            background-color: #154da3; /* Cor de fundo do botão ao passar o mouse */
+        }
+
+        .voltar-button {
+            background-color: #0b2470; /* Cor de fundo do botão */
+            color: #fff; /* Cor do texto do botão */
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s; /* Transição suave de cor ao passar o mouse */
+        }
+
+        .voltar-button:hover {
+            background-color: #154da3; /* Cor de fundo do botão ao passar o mouse */
+        }
+    </style>
+</head>
+<body>
+    <h1>Encontre rotas no Google Maps</h1>
+  
+    <div id="rotas">
+        <div id="rota1">
+            <h2>Rota 1</h2>
+            <label for="start1">Partida:</label>
+            <input type="text" id="start1">
+            <label for="end1">Destino:</label>
+            <input type="text" id="end1">
+            <button onclick="adicionarPonto(1)">Adicionar Ponto de Parada</button>
+        </div>
+    </div>
+
+    <button onclick="calcularRotas()">Buscar Rotas</button>
+    <button class="voltar-button" onclick="window.location.href = '/site/motorista/opcional.html'">Voltar</button>
+
+    <script>
+        let rotas = 1;
+        let pontosDeParada = {};
+
+        function adicionarPonto(rota) {
+            if (!pontosDeParada[rota]) {
+                pontosDeParada[rota] = [];
+            }
+            const ponto = document.getElementById(`end${rota}`).value;
+            pontosDeParada[rota].push(ponto);
+            document.getElementById(`end${rota}`).value = "";
+        }
+
+        function calcularRotas() {
+            for (let i = 1; i <= rotas; i++) {
+                const partida = document.getElementById(`start${i}`).value;
+                const destino = document.getElementById(`end${i}`).value;
+                let url = "https://www.google.com/maps/dir/?api=1";
+                
+                // Adiciona a partida e o primeiro ponto de parada (se houver) à URL
+                url += "&origin=" + encodeURIComponent(partida);
+                if (pontosDeParada[i] && pontosDeParada[i].length > 0) {
+                    url += "&waypoints=" + encodeURIComponent(pontosDeParada[i][0]);
+                }
+
+                // Adiciona os pontos de parada intermediários (se houver) à URL
+                if (pontosDeParada[i] && pontosDeParada[i].length > 1) {
+                    for (let j = 1; j < pontosDeParada[i].length; j++) {
+                        url += "&waypoints=" + encodeURIComponent(pontosDeParada[i][j]);
+                    }
+                }
+
+                // Adiciona o destino à URL
+                url += "&destination=" + encodeURIComponent(destino);
+
+                // Abre a URL no Google Maps
+                window.open(url);
+            }
+        }
+    </script>
+</body>
+</html>

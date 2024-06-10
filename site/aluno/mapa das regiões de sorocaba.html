@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapas das Regiões de Sorocaba-SP</title>
+  
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+  
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Cor de fundo */
+            color: #333; /* Cor do texto */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://t3.ftcdn.net/jpg/08/25/53/40/240_F_825534071_Mh4oWFgUtszmSFlI5xcs1XFVkVfqKQE2.jpg');
+            background-size: cover;
+            /*filter: blur(5px);  Efeito de desfoque apenas na imagem de fundo */
+            z-index: -1; /* Coloca o fundo atrás do conteúdo */
+        }
+    
+        .container {
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #ffc107; /* Cor de fundo do container */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    
+        h1 {
+            color: #333; /* Cor do título */
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .map-container {
+            height: 300px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #ffc107; /* Cor de fundo do botão */
+            border-color: #ffc107; /* Cor da borda do botão */
+            color: #333; /* Cor do texto do botão */
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s; /* Transição suave */
+        }
+
+        button:hover {
+            background-color: #ffca2b; /* Cor de fundo do botão ao passar o mouse */
+            border-color: #ffca2b; /* Cor da borda do botão ao passar o mouse */
+            color: #333; /* Cor do texto do botão ao passar o mouse */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5 mb-4">Mapas das Regiões de Sorocaba-SP</h1>
+
+        <button onclick="window.location.href = 'opcional2.html'">Voltar</button>
+
+        <!-- Divs para os mapas -->
+        <div id="mapSul" class="map-container"></div>
+        <div id="mapLeste" class="map-container"></div>
+        <div id="mapCentro" class="map-container"></div>
+        <div id="mapOeste" class="map-container"></div>
+        <div id="mapNorte" class="map-container"></div>
+    </div>
+
+    <!-- Scripts no final do body -->
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- JavaScript para renderizar os mapas -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const maps = [
+                { id: 'mapSul', center: [-23.5175, -47.4976], point: [-23.5175, -47.4976], label: 'Região Sul de Sorocaba' },
+                { id: 'mapLeste', center: [-23.4966, -47.4452], point: [-23.4966, -47.4452], label: 'Região Leste de Sorocaba' },
+                { id: 'mapCentro', center: [-23.5017, -47.4580], point: [-23.5017, -47.4580], label: 'Região Central de Sorocaba' },
+                { id: 'mapOeste', center: [-23.5071, -47.4788], point: [-23.5071, -47.4788], label: 'Região Oeste de Sorocaba' },
+                { id: 'mapNorte', center: [-23.4762, -47.4565], point: [-23.4762, -47.4565], label: 'Região Norte de Sorocaba' }
+            ];
+
+            maps.forEach(mapData => {
+                const map = L.map(mapData.id).setView(mapData.center, 13);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                const marker = L.marker(mapData.point).addTo(map);
+                marker.bindPopup(`Ponto de Referencia - ${mapData.label}`).openPopup();
+            });
+        });
+    </script>
+</body>
+</html>

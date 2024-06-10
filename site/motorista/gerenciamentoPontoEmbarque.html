@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Pontos de Embarque</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://t3.ftcdn.net/jpg/08/17/33/94/240_F_817339445_MJ25a9RjiATxesUQw0l7Cws7QMsBOSu8.webp');
+            background-size: cover;
+            /*filter: blur(5px);  Efeito de desfoque apenas na imagem de fundo */
+            z-index: -1; /* Coloca o fundo atrás do conteúdo */
+        }
+
+        h1 {
+            color: #0b2470;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0b2470;
+        }
+
+        input[type="text"],
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button[type="submit"],
+        button[type="button"] {
+            background-color: #0b2470;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button[type="submit"]:hover,
+        button[type="button"]:hover {
+            background-color: #154da3;
+        }
+
+        #map {
+            width: 80%;
+            height: 500px;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .scroll-container {
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #ffffff;
+        }
+
+        h2 {
+            color: #fafafa;
+            text-align: center;
+            margin: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+        }
+
+        .back-button {
+            background-color: #0b2470;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background-color: #154da3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerenciamento de Pontos de Embarque</h1>
+    
+    <div class="scroll-container">
+        <form id="formPontoEmbarque" class="container">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" placeholder="Exemplo: Henrique Lima" required>
+
+            <label for="cep">CEP:</label>
+            <input type="text" id="cep" placeholder="Exemplo: 12345-678" required>
+
+            <label for="descricao">Descrição:</label>
+            <textarea id="descricao" placeholder="Exemplo: Tio Lima - Facens Noite" required></textarea>
+
+            <label for="contato">Informações de Contato:</label>
+            <input type="text" placeholder="Exemplo: 15987654321" id="contato" required>
+
+            <button type="submit">Salvar Ponto de Embarque</button>
+            <button type="button" onclick="window.history.back()">Voltar</button>
+        </form>
+
+        <div id="map" class="container"></div>
+
+        <h2>Seus Pontos de Embarque</h2>
+        <table id="pontos-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Contato</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <button class="back-button" onclick="window.location.href = '/site/motorista/opcional.html'">Voltar</button>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([-23.5015, -47.4526], 13); // Centro inicial do mapa em Sorocaba
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
+
+        async function getCoordinatesFromCEP(cep) {
+            const apiKey = 'a54d5b7814224af199ae0f18c0841b87'; // Coloque aqui sua chave de API do OpenCage Data
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${cep}&key=${apiKey}&countrycode=br&limit=1`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    const { lat, lng } = data.results[0].geometry;
+                    return { latitude: lat, longitude: lng };
+                } else {
+                    throw new Error('CEP não encontrado');
+                }
+            } catch (error) {
+                console.error('Erro ao converter CEP para coordenadas:', error);
+                throw error;
+            }
+        }
+
+        document.getElementById('formPontoEmbarque').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const motoristaId = localStorage.getItem('motoristaId'); // Assuming you store the motoristaId in local storage after login
+            const nome = document.getElementById('nome').value;
+            const cep = document.getElementById('cep').value;
+            const descricao = document.getElementById('descricao').value;
+            const contato = document.getElementById('contato').value;
+
+            try {
+                const { latitude, longitude } = await getCoordinatesFromCEP(cep);
+
+                // Adiciona o ponto ao mapa
+                L.marker([latitude, longitude]).addTo(map)
+                    .bindPopup(`<b>${nome}</b><br>${descricao}<br>${contato}`)
+                    .openPopup();
+
+                // Centraliza o mapa no ponto adicionado
+                map.setView([latitude, longitude], 13);
+
+                const endpoint = 'https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user';
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome,
+                        latitude,
+                        longitude,
+                        descricao,
+                        contato,
+                        motoristaId
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Ponto de embarque cadastrado com sucesso!');
+                    this.reset();
+                    fetchPontos(); // Atualiza a lista de pontos após a criação
+                } else {
+                    throw new Error('Erro ao cadastrar ponto de embarque');
+                }
+            } catch (error) {
+                alert('Erro ao cadastrar ponto de embarque. Tente novamente mais tarde.');
+            }
+        });
+
+        async function fetchPontos() {
+            const motoristaId = localStorage.getItem('motoristaId'); // Assuming you store the motoristaId in local storage after login
+
+            try {
+                const response = await fetch('https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user');
+                const data = await response.json();
+
+                const filteredData = data.filter(ponto => ponto.motoristaId === motoristaId);
+
+                const tbody = document.querySelector('#pontos-table tbody');
+                tbody.innerHTML = ''; // Limpa tabela
+
+                filteredData.forEach(ponto => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${ponto.nome}</td>
+                        <td>${ponto.descricao}</td>
+                        <td>${ponto.contato}</td>
+                        <td>
+                            <button onclick="editPonto('${ponto.id}')">Editar</button>
+                            <button onclick="deletePonto('${ponto.id}')">Excluir</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+
+                    L.marker([ponto.latitude, ponto.longitude]).addTo(map)
+                        .bindPopup(`<b>${ponto.nome}</b><br>${ponto.descricao}<br>${ponto.contato}`)
+                        .openPopup();
+                });
+            } catch (error) {
+                console.error('Erro ao buscar pontos de embarque:', error);
+            }
+        }
+
+        async function editPonto(id) {
+            const motoristaId = localStorage.getItem('motoristaId');
+
+            try {
+                const response = await fetch(`https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user/${id}`);
+                const ponto = await response.json();
+
+                if (ponto.motoristaId !== motoristaId) {
+                    alert('Você não tem permissão para editar este ponto de embarque.');
+                    return;
+                }
+
+                const novoNome = prompt('Digite o novo nome:', ponto.nome);
+                const novaDescricao = prompt('Digite a nova descrição:', ponto.descricao);
+                const novoContato = prompt('Digite o novo contato:', ponto.contato);
+
+                if (novoNome && novaDescricao && novoContato) {
+                    await fetch(`https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            nome: novoNome,
+                            descricao: novaDescricao,
+                            contato: novoContato,
+                            motoristaId
+                        })
+                    });
+                    alert('Ponto de embarque atualizado com sucesso!');
+                    fetchPontos();
+                }
+            } catch (error) {
+                console.error('Erro ao editar ponto de embarque:', error);
+            }
+        }
+
+        async function deletePonto(id) {
+            const motoristaId = localStorage.getItem('motoristaId');
+
+            try {
+                const response = await fetch(`https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user/${id}`);
+                const ponto = await response.json();
+
+                if (ponto.motoristaId !== motoristaId) {
+                    alert('Você não tem permissão para excluir este ponto de embarque.');
+                    return;
+                }
+
+                const confirmar = confirm('Tem certeza que deseja excluir este ponto de embarque?');
+                if (confirmar) {
+                    await fetch(`https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user/${id}`, {
+                        method: 'DELETE'
+                    });
+                    alert('Ponto de embarque excluído com sucesso!');
+                    fetchPontos();
+                }
+            } catch (error) {
+                console.error('Erro ao excluir ponto de embarque:', error);
+            }
+        }
+
+        fetchPontos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: "Roboto", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #000;
+    min-height: 100vh;
+    display: flex; 
+    flex-direction: column;
+}
+main {
+    flex-grow: 1; 
+    background-color: #f7f7f7;
+}
+
+#logo{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* container aluno|motorista */
+#container {
+    max-width: 800px;
+    margin: auto; 
+    text-align: center;
+}
+
+#container > p{
+    margin: 20px;   
+}
+
+h1 {
+    color: #000;
+    margin: 20px;
+}
+
+#areas >p {
+    margin-bottom: 20px;
+}
+
+#areas {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 50px;
+}
+
+#areaAluno, #areaMotorista {
+    max-width: 40%; 
+    padding: 25px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    margin-bottom: 20px;
+}
+
+#informacaoAluno> h2{
+    color: #000;
+    margin-bottom: 10px;
+
+}
+
+#informacaoMotorista> h2{
+    color: #000;
+    margin-bottom: 10px;
+}
+
+/* fim area aluno|motorista */
+
+/* botao */
+.botao{
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.alunoBotao {
+    background-color: #f8c52c; 
+    color: #000;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+.alunoBotao:hover {
+    background-color: #ffc107;
+    transform: scale(1.08);
+    transition: .39s;
+    color: #000;
+}
+
+.motoristaBotao {
+    background-color: #1E3888;
+    color: #fff;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s;
+}
+
+.motoristaBotao:hover {
+    background-color: #0b2470;
+    transform: scale(1.08);
+    transition: .39s;
+    color: #fff;
+}
+/* fim do botao */
+
+/* rodape */
+footer {
+    background-color: #ffc107; 
+    color: #000;
+    font-weight: bold;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.direitosReservados{
+    padding: 20px;
+    font-size: 1.4vw;
+}
+/* fim rodape */
+
+
+@media screen and (max-width: 768px) {
+  #areaAluno, #areaMotorista {
+    max-width: 70%; 
+  }
+}

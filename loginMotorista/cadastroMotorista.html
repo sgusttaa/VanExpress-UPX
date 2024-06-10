@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário</title>
+    <!-- Adicione a folha de estilo do Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #b3c2f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #b3c2f0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Estilo para o formulário */
+        #formContainer {
+            position: relative;
+            width: 80%;
+            max-width: 800px; /* Ajuste o tamanho máximo conforme necessário */
+            overflow: hidden; /* Impede que a imagem ultrapasse os limites do formulário */
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://ocarreteiro.com.br/wp-content/uploads/2023/03/Motorista-3-baixa.jpg.webp');
+            background-size: cover;
+            filter: blur(10px); /* Efeito de desfoque apenas na imagem de fundo */
+            z-index: -1; /* Coloca o fundo atrás do conteúdo */
+        }
+
+        #formCadastro {
+            background-color: rgba(255, 255, 255, 0.8); /* Cor de fundo com transparência */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative; /* Para garantir que o conteúdo interno fique acima do fundo */
+            z-index: 1; /* Garante que o formulário esteja sobre o fundo */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0b2470;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: rgba(255, 255, 255, 0.9); /* Cor de fundo com transparência */
+        }
+
+        button[type="submit"] {
+            background-color: #0b2470;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #154da3;
+        }
+
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button[type="button"] {
+            background-color: #499af7;
+            transform: scale(1.08);
+            transition: .39s;
+            color: #154da3;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 5%;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none; /* Adicionado para remover sublinhado do link */
+            display: inline-block; /* Adicionado para fazer o botão funcionar corretamente */
+        }
+
+        button[type="button"]:hover {
+            background-color: #154da3;
+        }
+        
+        button[type="button"] a {
+            text-decoration: none; /* Remove sublinhado do link */
+            color: #0b2470; /* Define a cor do texto do link */
+            display: block; /* Faz o link ocupar todo o espaço do botão */
+        }
+
+        .alert {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35%;
+            height: 7%;
+            text-align: right;
+            padding: -10rem;
+        }
+
+        .spinner-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999; /* Certifica-se de que o spinner esteja na frente de outros elementos */
+            display: none; /* Inicialmente oculto */
+            filter: blur(2px); /* Efeito de desfoque */
+            text-align: center; /* Alinha o texto ao centro */
+        }
+        
+        .spinner-container p {
+            margin-top: 10px; /* Adiciona um espaço entre o spinner e o texto */
+        }
+    </style>
+</head>
+<body>
+    <h1>Cadastro de Usuário</h1>
+
+    <div id="alertContainer"></div>
+
+    <form id="formCadastro">
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="email" required>
+
+            <div id="emailHelp" class="form-text">Insira aqui seu e-mail para cadastro</div>
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha:</label>
+            <input type="password" class="form-control" id="senha" required>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Caixa de verificação</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Cadastrar</button>
+    </form>
+
+    <div class="spinner-container" id="spinnerContainer">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Redirecionando...</p>
+    </div>
+
+    <div class="alert alert-success" role="alert" id="successMessage" style="display: none;">
+        Cadastro realizado com sucesso! Redirecionando para a página de login...
+    </div>
+
+    <button type="button" class="btn btn-secondary"><a href="/loginMotorista/loginMotorista.html">Voltar</a></button>
+
+    <!-- Adicione o script do Bootstrap -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('formCadastro').addEventListener('submit', async function(event) {
+            event.preventDefault();
+        
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const checkBox = document.getElementById('exampleCheck1');
+        
+            // Verifica se a caixa de verificação está marcada
+            if (!checkBox.checked) {
+                // Exibe uma mensagem de alerta personalizada usando uma div com a classe de alerta
+                const alertDiv = document.createElement('div');
+                alertDiv.classList.add('alert', 'alert-warning', 'd-flex', 'align-items-center');
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    <div>
+                        Por favor, marque a caixa de verificação para prosseguir com o cadastro.
+                    </div>
+                `;
+                document.getElementById('alertContainer').appendChild(alertDiv);
+        
+                // Aguarda 3 segundos e, em seguida, remove a mensagem de alerta
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
+        
+                return;
+            }
+        
+            const endpoint = 'https://65f0c8ddda8c6584131c69a1.mockapi.io/api/formilario/motorista';
+        
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        senha
+                    })
+                });
+        
+                if (response.ok) {
+                    // Exibe a mensagem de sucesso
+                    document.getElementById('successMessage').style.display = 'block';
+                    // Mostra o spinner e a mensagem de sucesso
+                    document.getElementById('spinnerContainer').style.display = 'block';
+                    // Redireciona após 6 segundos
+                    setTimeout(function() {
+                        window.location.href = 'loginMotorista.html';
+                    }, 6000);
+                } else {
+                    throw new Error('Erro ao cadastrar usuário');
+                }
+            } catch (error) {
+                console.error('Erro ao enviar dados para a API:', error);
+                alert('Erro ao cadastrar usuário. Tente novamente mais tarde.');
+            }
+        });
+
+        
+    </script>
+</body>
+</html>

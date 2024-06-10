@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização de Pontos de Embarque</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d3c06b; /* Cor de fundo */
+            color: #333; /* Cor do texto */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333; /* Cor do título */
+            margin-top: 20px;
+        }
+
+        #map {
+            height: 60vh;
+            width: 80%;
+            margin: 20px auto;
+            border: 1px solid #ccc; /* Borda do mapa */
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #ffc107; /* Cor de fundo do botão */
+            color: #333; /* Cor do texto do botão */
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s; /* Transição suave */
+        }
+
+        button:hover {
+            background-color: #ffca2b; /* Cor de fundo do botão ao passar o mouse */
+        }
+    </style>
+</head>
+<body>
+    <h1>Visualização de Pontos de Embarque</h1>
+    <button onclick="window.location.href = 'opcional2.html'">Voltar</button>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const endpoint = 'https://664237d43d66a67b3436ac24.mockapi.io/ponto-embarque/user';
+
+            const map = L.map('map').setView([-23.4966, -47.4452], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            const markers = []; // Array para armazenar os marcadores
+
+            const fetchAndDisplayMarkers = async () => {
+                try {
+                    const response = await fetch(endpoint);
+                    const data = await response.json();
+
+                    // Limpar marcadores antigos
+                    markers.forEach(marker => map.removeLayer(marker));
+                    markers.length = 0; // Limpar o array de marcadores
+
+                    // Adicionar novos marcadores
+                    data.forEach(ponto => {
+                        const marker = L.marker([ponto.latitude, ponto.longitude]).addTo(map);
+                        const popupContent = `
+                            <b>${ponto.nome}</b><br>
+                            <p>${ponto.descricao}</p>
+                            <p>Contato: ${ponto.contato}</p>
+                        `;
+                        marker.bindPopup(popupContent);
+                        markers.push(marker); // Adicionar marcador ao array
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar dados do ponto de embarque:', error);
+                    alert('Erro ao carregar dados do ponto de embarque. Tente novamente mais tarde.');
+                }
+            };
+
+            // Chamar a função para buscar e exibir os marcadores inicialmente
+            fetchAndDisplayMarkers();
+
+            // Atualizar os marcadores a cada 30 segundos (por exemplo)
+            setInterval(fetchAndDisplayMarkers, 30000); // Atualizar a cada 30 segundos (30000 milissegundos)
+        });
+    </script>
+</body>
+</html>
